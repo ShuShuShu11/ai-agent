@@ -7,7 +7,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -90,7 +89,7 @@ public class TourismApp {
     // AI 旅游知识库问答功能
 
     @Resource
-    private VectorStore tourismVectorStore;
+    private VectorStore tourismSimpleVectorStore;
 
     @Resource
     private QueryRewriter queryRewriter;
@@ -105,7 +104,7 @@ public class TourismApp {
                 .user(rewrittenMessage)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(new MyLoggerAdvisor())
-                .advisors(new QuestionAnswerAdvisor(tourismVectorStore))
+                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(tourismSimpleVectorStore, null))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
@@ -158,7 +157,7 @@ public class TourismApp {
                 .user(rewrittenMessage)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(new MyLoggerAdvisor())
-                .advisors(new QuestionAnswerAdvisor(tourismVectorStore))
+                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(tourismSimpleVectorStore, null))
                 .toolCallbacks(allTools)
                 .stream()
                 .content();
