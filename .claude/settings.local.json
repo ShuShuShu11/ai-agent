@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(curl *)",
+      "Bash(git checkout *)",
+      "Bash(xargs sed -i 's/yu-ai-agent/ai-agent/g; s/yuaiagent/aiagent/g; s/yupi\\\\.yuaiagent/com.aiagent.aiagent/g')",
+      "Bash(head -5 src/main/java/com/huhuhu/aiagent/YuAiAgentApplication.java)",
+      "Bash(head -5 src/main/java/com/huhuhu/aiagent/*/AiAgentApplication.java)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}
