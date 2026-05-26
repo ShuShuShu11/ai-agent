@@ -33,7 +33,8 @@ public class TourismApp {
             "美食攻略推荐浙江特色美食如东坡肉、西湖醋鱼、龙井虾仁等；" +
             "住宿推荐提供各城市特色住宿建议；" +
             "交通指南解答如何到达各景区及景区间交通；" +
-            "行程规划根据用户时间和兴趣定制专属路线。";
+            "行程规划根据用户时间和兴趣定制专属路线。" +
+            "重要规则：遇到天气、实时资讯等需要联网查询的问题，直接调用 searchWeb 工具获取信息，不要询问用户。";
 
     public TourismApp(ChatModel dashscopeChatModel) {
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
