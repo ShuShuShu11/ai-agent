@@ -16,7 +16,11 @@
       "Bash(git branch *)",
       "Bash(git push *)",
       "Bash(git mv *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(./mvnw compile *)",
+      "Bash(ls -la target/classes/com/huhuhu/aiagent/tools/WebScrapingTool.class)",
+      "Bash(stat -c \"%y\" target/classes/com/huhuhu/aiagent/tools/WebScrapingTool.class)",
+      "Bash(./mvnw clean *)"
     ]
   }
 }

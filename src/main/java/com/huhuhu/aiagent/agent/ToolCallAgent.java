@@ -35,6 +35,9 @@ public class ToolCallAgent extends ReActAgent {
     // 保存工具调用信息的响应结果（要调用那些工具）
     private ChatResponse toolCallChatResponse;
 
+    // 记录最后一次无需工具调用时的 AI 响应文本
+    private String lastNoToolResponse;
+
     // 工具调用管理者
     private final ToolCallingManager toolCallingManager;
 
@@ -69,7 +72,7 @@ public class ToolCallAgent extends ReActAgent {
         try {
             ChatResponse chatResponse = getChatClient().prompt(prompt)
                     .system(getSystemPrompt())
-                    .tools(availableTools)
+                    .toolCallbacks(availableTools)
                     .call()
                     .chatResponse();
             // 记录响应，用于等下 Act
@@ -89,6 +92,8 @@ public class ToolCallAgent extends ReActAgent {
             log.info(toolCallInfo);
             // 如果不需要调用工具，返回 false
             if (toolCallList.isEmpty()) {
+                // 记录无需工具调用时的 AI 响应文本
+                this.lastNoToolResponse = result;
                 // 只有不调用工具时，才需要手动记录助手消息
                 getMessageList().add(assistantMessage);
                 return false;

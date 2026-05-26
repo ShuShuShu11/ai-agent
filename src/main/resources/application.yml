@@ -64,3 +64,7 @@ search-api:
 logging:
   level:
     org.springframework.ai: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %magenta(%thread) %red(%logger{36}) - %msg%n"
+  charset:
+    console: UTF-8

@@ -1,5 +1,6 @@
 package com.huhuhu.aiagent.agent;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,14 @@ public abstract class ReActAgent extends BaseAgent {
             // 先思考
             boolean shouldAct = think();
             if (!shouldAct) {
+                // 如果不需要执行工具，则返回 AI 的响应文本
+                if (this instanceof ToolCallAgent) {
+                    ToolCallAgent toolAgent = (ToolCallAgent) this;
+                    String response = toolAgent.getLastNoToolResponse();
+                    if (StrUtil.isNotBlank(response)) {
+                        return response;
+                    }
+                }
                 return "思考完成 - 无需行动";
             }
             // 再行动
