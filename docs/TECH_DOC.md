@@ -4,7 +4,7 @@
 
 ```
 ai-agent/
-├── app/LoveApp.java           ← AI 恋爱大师
+├── app/TourismApp.java         ← 浙江旅游助手
 ├── agent/
 │   ├── Manus.java           ← 超级智能体
 │   ├── ToolCallAgent.java    ← 工具调用代理
@@ -21,7 +21,7 @@ ai-agent/
 
 | 应用 | 入口类 | 功能 |
 |------|--------|------|
-| **LoveApp** | `app/LoveApp.java` | 情感咨询对话、RAG 知识库、工具调用 |
+| **TourismApp** | `app/TourismApp.java` | 浙江旅游咨询对话、RAG 知识库、工具调用 |
 | **Manus** | `agent/Manus.java` | 超级智能体，ReAct 模式自主规划 |
 
 ---
@@ -42,15 +42,15 @@ ai-agent/
 
 ## 四、接口列表
 
-### 4.1 LoveApp 接口
+### 4.1 TourismApp 接口
 
 | 接口 | 功能 | 工具调用 |
 |------|------|----------|
-| `GET /ai/love_app/chat/sync` | 同步对话（基础） | 无 |
-| `GET /ai/love_app/chat/sse` | 流式对话（基础） | 无 |
-| `GET /ai/love_app/chat/with_tools/sync` | 同步对话（带工具） | WebSearch 等 |
-| `GET /ai/love_app/chat/with_tools/sse` | 流式对话（带工具） | WebSearch 等 |
-| `GET /ai/love_app/chat/rag` | RAG 知识库对话 | 检索增强 |
+| `GET /ai/tourism/chat/sync` | 同步对话（基础） | 无 |
+| `GET /ai/tourism/chat/sse` | 流式对话（基础） | 无 |
+| `GET /ai/tourism/chat/with_tools/sync` | 同步对话（带工具） | WebSearch 等 |
+| `GET /ai/tourism/chat/with_tools/sse` | 流式对话（带工具） | WebSearch 等 |
+| `GET /ai/tourism/chat/rag` | RAG 知识库对话 | 检索增强 |
 
 ### 4.2 Manus 接口
 
@@ -63,14 +63,14 @@ ai-agent/
 ## 五、curl 命令
 
 ```bash
-# LoveApp 同步（无工具）
-curl "http://localhost:8123/api/ai/love_app/chat/sync?message=你好&chatId=test"
+# TourismApp 同步（无工具）
+curl "http://localhost:8123/api/ai/tourism/chat/sync?message=杭州有哪些景点&chatId=test"
 
-# LoveApp 带工具搜索
-curl "http://localhost:8123/api/ai/love_app/chat/with_tools/sync?message=搜索今天的天气&chatId=test"
+# TourismApp 带工具搜索
+curl "http://localhost:8123/api/ai/tourism/chat/with_tools/sync?message=搜索西湖今天的天气&chatId=test"
 
-# LoveApp RAG 知识库问答
-curl "http://localhost:8123/api/ai/love_app/chat/rag?message=单身如何脱单&chatId=test"
+# TourismApp RAG 知识库问答
+curl "http://localhost:8123/api/ai/tourism/chat/rag?message=浙江有哪些美食推荐&chatId=test"
 
 # Manus
 curl "http://localhost:8123/api/ai/manus/chat?message=搜索今天的天气" -H "Accept: text/event-stream"
@@ -81,7 +81,7 @@ curl "http://localhost:8123/api/ai/manus/chat?message=搜索今天的天气" -H 
 ## 六、Postman 使用
 
 1. **Method**: `GET`
-2. **URL**: `http://localhost:8123/api/ai/love_app/chat/sync?message=你好&chatId=test`
+2. **URL**: `http://localhost:8123/api/ai/tourism/chat/sync?message=你好&chatId=test`
 3. **Params**: `message` = `你好`, `chatId` = `test`
 4. **流式接口**: Headers 加 `Accept` = `text/event-stream`
 

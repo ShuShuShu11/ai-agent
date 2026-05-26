@@ -44,9 +44,14 @@ export const connectSSE = (url, params, onMessage, onError) => {
   return eventSource
 }
 
-// AI恋爱大师聊天
-export const chatWithLoveApp = (message, chatId) => {
-  return connectSSE('/ai/love_app/chat/sse', { message, chatId })
+// 浙江旅游助手聊天
+export const chatWithTourism = (message, chatId) => {
+  return connectSSE('/ai/tourism/chat/sse', { message, chatId })
+}
+
+// 浙江旅游助手聊天（带工具+RAG）
+export const chatWithTourismToolsAndRag = (message, chatId) => {
+  return connectSSE('/ai/tourism/chat/with_tools_and_rag/sse', { message, chatId })
 }
 
 // AI超级智能体聊天
@@ -55,6 +60,7 @@ export const chatWithManus = (message) => {
 }
 
 export default {
-  chatWithLoveApp,
+  chatWithTourism,
+  chatWithTourismToolsAndRag,
   chatWithManus
 } 

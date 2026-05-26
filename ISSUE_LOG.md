@@ -326,6 +326,101 @@ Document document = Jsoup.connect(url)
 
 ---
 
+## 问题 9：恋爱大师 → 浙江旅游助手 重构
+
+**日期：** 2026-05-26
+
+### 项目描述
+
+将项目从"AI恋爱大师"重构为"浙江旅游助手"，所有内容、提示词、文档、注释、前端页面均需修改。文档内容以浙江省为主。
+
+### 修改内容
+
+**后端：**
+- `LoveApp.java` → `TourismApp.java`（重命名+旅游系统提示词）
+- `AiController.java`：端点从 `/love_app` 改为 `/tourism`
+- RAG相关类全部重命名：`LoveApp*` → `Tourism*`
+  - `LoveAppDocumentLoader.java` → `TourismDocumentLoader.java`
+  - `LoveAppVectorStoreConfig.java` → `TourismVectorStoreConfig.java`
+  - `LoveAppRagCustomAdvisorFactory.java` → `TourismRagCustomAdvisorFactory.java`
+  - `LoveAppContextualQueryAugmenterFactory.java` → `TourismContextualQueryAugmenterFactory.java`
+  - `LoveAppRagCloudAdvisorConfig.java` → `TourismRagCloudAdvisorConfig.java`
+- 删除旧恋爱文档，新增3篇浙江旅游文档：
+  - `浙江热门景点推荐.md`
+  - `浙江特色美食攻略.md`
+  - `浙江行程规划指南.md`
+- 注释和类描述更新为旅游相关
+
+**前端：**
+- `LoveMaster.vue` → `Tourism.vue`
+- `Home.vue`：移除"AI恋爱大师"卡片，保留"浙江旅游助手"和"AI超级智能体"
+- `router/index.js`：移除 `/love-master` 路由
+- `api/index.js`：移除 `chatWithLoveApp`，保留 `chatWithTourism` 和 `chatWithManus`
+
+### 验证结果
+
+- 后端编译：✅ BUILD SUCCESS
+- 前端构建：✅ built in 1.78s
+- 启动测试：✅ SSE 流式返回正常，AI 正确回复旅游助手欢迎语
+
+### 经验总结
+
+- 重构时注意同时修改前后端路由/端点保持一致
+- 类名重命名后检查所有引用
+- 删除旧文档后确认编译和构建均成功
+
+---
+
+## 问题 10：PDF 生成中文字体显示为乱码
+
+**日期：** 2026-05-26
+
+### 问题描述
+
+`PDFGenerationTool` 生成的 PDF 中，中文字符全部显示为乱码（如 `&` `++` `6–7` 等符号字符），无法正常阅读。
+
+### 原因分析
+
+原代码使用 `PdfFontFactory.createFont()` 创建内置 Helvetica 字体（PDF 标准字体），不支持中文字符。中文字符被当作非标准字符处理，渲染失败变成乱码。
+
+### 解决方法
+
+1. **复制字体文件到项目**
+   ```bash
+   cp C:/Windows/Fonts/simsun.ttc src/main/resources/fonts/
+   ```
+
+2. **修改 `PDFGenerationTool.java`**
+   ```java
+   private PdfFont createChineseFont() throws IOException {
+       // 使用 classpath 中的中文字体（宋体）
+       return PdfFontFactory.createFont("/fonts/simsun.ttc,0");
+   }
+   ```
+
+3. **保留换行格式**
+   ```java
+   String[] lines = content.split("\n");
+   for (String line : lines) {
+       document.add(new Paragraph(line));
+   }
+   ```
+
+### 验证结果
+
+- ✅ 中文内容（标题、段落）显示正确
+- ✅ 相对路径 `/fonts/simsun.ttc,0` 正常工作
+- ⚠️ emoji（✨🎉🌅等）不支持，因为 simsun.ttc 是中文字体，不含 emoji 字形
+
+### 经验总结
+
+- iText 生成中文 PDF 需要嵌入中文字体（Helvetica 不支持中文）
+- 字体文件放在 `src/main/resources/` 下，使用 `/fonts/xxx` 相对路径加载
+- 宋体（simsun.ttc）是 Windows 中文系统标配，第一个成功加载的中文字体
+- TTC 字体集合格式为 `路径,索引`（如 `simsun.ttc,0` = 宋体常规）
+
+---
+
 ## 模板
 
 ```markdown

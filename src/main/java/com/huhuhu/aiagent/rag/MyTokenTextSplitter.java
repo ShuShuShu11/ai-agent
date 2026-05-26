@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 自定义基于 Token 的切词器
+ * 自定义基于 Token 的切词器 - 浙江旅游知识库文档切分
  */
 @Component
 class MyTokenTextSplitter {

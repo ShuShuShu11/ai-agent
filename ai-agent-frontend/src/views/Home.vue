@@ -6,20 +6,22 @@
     </div>
 
     <div class="apps-container">
-      <div class="app-card" @click="navigateTo('/love-master')">
-        <div class="app-icon love-icon">
+      <div class="app-card" @click="navigateTo('/tourism')">
+        <div class="app-icon tourism-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 21C12 21 3 13.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 13.5 12 21 12 21Z"/>
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
           </svg>
         </div>
         <div class="app-info">
-          <div class="app-title">AI恋爱大师</div>
-          <div class="app-desc">智能情感顾问，帮你解答恋爱烦恼</div>
+          <div class="app-title">浙江旅游助手</div>
+          <div class="app-desc">浙江文旅专家，景点美食行程规划全搞定</div>
         </div>
         <div class="app-tags">
-          <span class="tag">情绪疏导</span>
-          <span class="tag">情感分析</span>
-          <span class="tag">恋爱建议</span>
+          <span class="tag">景点推荐</span>
+          <span class="tag">美食攻略</span>
+          <span class="tag">行程规划</span>
         </div>
         <div class="app-button">
           <span>立即体验</span>
@@ -145,8 +147,8 @@ const navigateTo = (path) => {
   color: #fff;
 }
 
-.love-icon {
-  background: linear-gradient(135deg, #ff6b8b, #ff8a9b);
+.tourism-icon {
+  background: linear-gradient(135deg, #10b981, #34d399);
 }
 
 .robot-icon {

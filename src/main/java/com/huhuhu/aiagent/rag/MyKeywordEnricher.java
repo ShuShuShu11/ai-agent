@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 基于 AI 的文档元信息增强器（为文档补充元信息）
+ * 基于 AI 的文档元信息增强器（为文档补充元信息）- 浙江旅游知识库
  */
 @Component
 public class MyKeywordEnricher {

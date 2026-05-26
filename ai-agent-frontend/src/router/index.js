@@ -7,16 +7,16 @@ const routes = [
     component: () => import('../views/Home.vue'),
     meta: {
       title: '首页 - 鱼皮AI超级智能体应用平台',
-      description: '鱼皮AI超级智能体应用平台提供AI恋爱大师和AI超级智能体服务，满足您的各种AI对话需求'
+      description: '鱼皮AI超级智能体应用平台提供浙江旅游助手和AI超级智能体服务，满足您的各种AI对话需求'
     }
   },
   {
-    path: '/love-master',
-    name: 'LoveMaster',
-    component: () => import('../views/LoveMaster.vue'),
+    path: '/tourism',
+    name: 'Tourism',
+    component: () => import('../views/Tourism.vue'),
     meta: {
-      title: 'AI恋爱大师 - 鱼皮AI超级智能体应用平台',
-      description: 'AI恋爱大师是鱼皮AI超级智能体应用平台的专业情感顾问，帮你解答各种恋爱问题，提供情感建议'
+      title: '浙江旅游助手 - 鱼皮AI超级智能体应用平台',
+      description: '浙江旅游助手是鱼皮AI超级智能体应用平台的文旅专家，为您提供浙江景点、美食、住宿、交通和行程规划咨询'
     }
   },
   {

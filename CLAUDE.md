@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 项目概述
 
 这是一个 AI 智能体项目，包含：
-- **ai-agent**: Spring Boot 3 后端（AI 恋爱大师 + 智能体）
+- **ai-agent**: Spring Boot 3 后端（浙江旅游助手 + 智能体）
 - **ai-agent-frontend**: Vue 3 前端
 - **image-search-mcp-server**: MCP 图片搜索服务
 
@@ -59,7 +59,7 @@ cd image-search-mcp-server
 ```
 controller/AiController          ← HTTP 接口层
     ↓
-app/LoveApp                     ← AI 应用层（恋爱大师）
+app/TourismApp                   ← AI 应用层（旅游助手）
     ↓
 agent/ReActAgent                ← 智能体抽象层
     ├── ToolCallAgent           ← 工具调用代理
@@ -106,8 +106,8 @@ Manus（Spring Component）
 
 | 端点 | 功能 |
 |------|------|
-| `GET /api/ai/love_app/chat/sync` | 同步聊天 |
-| `GET /api/ai/love_app/chat/sse` | SSE 流式聊天 |
+| `GET /api/ai/tourism/chat/sync` | 同步聊天 |
+| `GET /api/ai/tourism/chat/sse` | SSE 流式聊天 |
 | `GET /api/ai/manus/chat` | Manus 智能体聊天 |
 
 ## 配置说明

@@ -1,7 +1,7 @@
 package com.huhuhu.aiagent.controller;
 
 import com.huhuhu.aiagent.agent.huhuManus;
-import com.huhuhu.aiagent.app.LoveApp;
+import com.huhuhu.aiagent.app.TourismApp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
@@ -20,7 +20,7 @@ import java.io.IOException;
 public class AiController {
 
     @Resource
-    private LoveApp loveApp;
+    private TourismApp tourismApp;
 
     @Resource
     private ToolCallback[] allTools;
@@ -28,82 +28,60 @@ public class AiController {
     @Resource
     private ChatModel dashscopeChatModel;
 
-    // ==================== LoveApp 基础对话 ====================
+    // ==================== TourismApp 基础对话 ====================
 
     /**
      * 同步对话（无工具）
      */
-    @GetMapping("/love_app/chat/sync")
-    public String doChatWithLoveAppSync(String message, String chatId) {
-        return loveApp.doChat(message, chatId);
+    @GetMapping("/tourism/chat/sync")
+    public String doChatWithTourismSync(String message, String chatId) {
+        return tourismApp.doChat(message, chatId);
     }
 
     /**
      * SSE 流式对话（无工具）- 返回纯文本流
      */
-    @GetMapping(value = "/love_app/chat/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> doChatWithLoveAppSSE(String message, String chatId) {
-        return loveApp.doChatByStream(message, chatId);
+    @GetMapping(value = "/tourism/chat/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatWithTourismSSE(String message, String chatId) {
+        return tourismApp.doChatByStream(message, chatId);
     }
 
-    /**
-     * SSE 流式对话（无工具）- 返回标准 ServerSentEvent 格式，带 data: 前缀
-     */
-    @GetMapping(value = "/love_app/chat/server_sent_event")
-    public Flux<ServerSentEvent<String>> doChatWithLoveAppServerSentEvent(String message, String chatId) {
-        return loveApp.doChatByStream(message, chatId)
-                .map(chunk -> ServerSentEvent.<String>builder()
-                        .data(chunk)
-                        .build());
-    }
-
-    /**
-     * SSE 流式对话（无工具）- 使用 SseEmitter，支持超时控制和错误处理
-     */
-    @GetMapping(value = "/love_app/chat/sse_emitter")
-    public SseEmitter doChatWithLoveAppServerSseEmitter(String message, String chatId) {
-        SseEmitter sseEmitter = new SseEmitter(180000L);
-        loveApp.doChatByStream(message, chatId)
-                .subscribe(
-                        chunk -> {
-                            try {
-                                sseEmitter.send(chunk);
-                            } catch (IOException e) {
-                                sseEmitter.completeWithError(e);
-                            }
-                        },
-                        sseEmitter::completeWithError,
-                        sseEmitter::complete
-                );
-        return sseEmitter;
-    }
-
-    // ==================== LoveApp 带工具调用 ====================
+    // ==================== TourismApp 带工具调用 ====================
 
     /**
      * 同步对话（带工具调用）
      */
-    @GetMapping("/love_app/chat/with_tools/sync")
-    public String doChatWithLoveAppWithToolsSync(String message, String chatId) {
-        return loveApp.doChatWithTools(message, chatId);
+    @GetMapping("/tourism/chat/with_tools/sync")
+    public String doChatWithTourismWithToolsSync(String message, String chatId) {
+        return tourismApp.doChatWithTools(message, chatId);
     }
 
     /**
      * SSE 流式对话（带工具调用）
      */
-    @GetMapping(value = "/love_app/chat/with_tools/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> doChatWithLoveAppWithToolsSSE(String message, String chatId) {
-        return loveApp.doChatWithToolsStream(message, chatId);
+    @GetMapping(value = "/tourism/chat/with_tools/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatWithTourismWithToolsSSE(String message, String chatId) {
+        return tourismApp.doChatWithToolsStream(message, chatId);
     }
 
-    // ==================== LoveApp RAG 知识库 ====================
+    // ==================== TourismApp 工具+RAG 知识库 ====================
+
+    /**
+     * SSE 流式对话（带工具调用 + RAG 知识库）
+     */
+    @GetMapping(value = "/tourism/chat/with_tools_and_rag/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> doChatWithTourismWithToolsAndRagSSE(String message, String chatId) {
+        return tourismApp.doChatWithToolsAndRagStream(message, chatId);
+    }
+
+    // ==================== TourismApp RAG 知识库 ====================
 
     /**
      * RAG 知识库对话（基于向量数据库检索增强）
      */
-    @GetMapping("/love_app/chat/rag")
-    public String doChatWithLoveAppRag(String message, String chatId) {
-        return loveApp.doChatWithRag(message, chatId);
+    @GetMapping("/tourism/chat/rag")
+    public String doChatWithTourismRag(String message, String chatId) {
+        return tourismApp.doChatWithRag(message, chatId);
     }
 
     // ==================== huhuManus ====================
