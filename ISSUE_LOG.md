@@ -540,27 +540,26 @@ public class TourismPgVectorStoreConfig {
 
 ### 解决方案（已实施）
 
-在 `doChatWithToolsAndRagStream` 中增加 `shouldUseRag()` 路由判断：
+配置 `ContextualQueryAugmenter` 的 `allowEmptyContext(true)`，允许空上下文时不注入拒绝提示：
 
 ```java
-private boolean shouldUseRag(String message) {
-    // 个人/闲聊问题，不走 RAG
-    if (message.matches(".*(叫什么|我是谁|记住|刚才|之前|我多少岁|我多大|你是谁|你好|嗨|哈喽).*")) {
-        return false;
-    }
-    // 旅游相关关键字，走 RAG
-    String[] tourismKeywords = {"景点", "美食", "酒店", "民宿", "门票", "西湖", "乌镇", "千岛湖", "杭州", "浙江", "旅游", "行程", "路线", "好玩", "推荐", "住宿", "交通", "天气"};
-    for (String kw : tourismKeywords) {
-        if (message.contains(kw)) {
-            return true;
-        }
-    }
-    return false;
-}
+// TourismRagCustomAdvisorFactory.java
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
+
+RetrievalAugmentationAdvisor.builder()
+    .documentRetriever(documentRetriever)
+    .queryAugmenter(ContextualQueryAugmenter.builder()
+            .allowEmptyContext(true)  // 允许空上下文，检索不到文档也继续回答
+            .build())
+    .build();
 ```
 
-- **走 RAG**：旅游相关问题（景点、美食、天气等）
-- **不走 RAG**：闲聊、个人信息、记忆相关问题
+**效果：**
+- 检索不到文档时，LLM 不会收到"outside knowledge base"注入提示
+- 闲聊问题不再被拒绝，可以正常回答
+- SYSTEM_PROMPT 的"不知道就说"和注入提示的双重拒绝问题解决
+
+**备选方案（未实施）：** `shouldUseRag()` 路由判断，通过关键词/正则匹配决定是否走 RAG advisor
 
 ---
 

@@ -1,7 +1,6 @@
 package com.huhuhu.aiagent.app;
 
 import com.huhuhu.aiagent.advisor.MyLoggerAdvisor;
-import com.huhuhu.aiagent.rag.QueryRewriter;
 import com.huhuhu.aiagent.rag.TourismRagCustomAdvisorFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +15,16 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 @Component
 @Slf4j
 public class TourismApp {
 
     private final ChatClient chatClient;
+    private final ChatModel dashscopeChatModel;
 
     private static final String SYSTEM_PROMPT = "你叫呼呼，是浙江旅游助手，风格亲切随和，像朋友聊天一样。" +
             "开场简单打招呼，告诉用户你是浙江旅游助手呼呼，随时可以问你浙江旅游相关问题。" +
@@ -29,7 +33,16 @@ public class TourismApp {
             "遇到不熟悉的问题，直接说不知道，不要编造。" +
             "回答要简洁友好，不要太正式。";
 
+    // 浙江省11个地级市
+    private static final String[] ZHEJIANG_CITIES = {
+            "杭州", "宁波", "温州", "嘉兴", "湖州",
+            "绍兴", "金华", "衢州", "舟山", "台州", "丽水"
+    };
+
+    private static final Random RANDOM = new Random();
+
     public TourismApp(ChatModel dashscopeChatModel) {
+        this.dashscopeChatModel = dashscopeChatModel;
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new InMemoryChatMemoryRepository())
                 .maxMessages(20)
@@ -47,9 +60,6 @@ public class TourismApp {
     private VectorStore tourismSimpleVectorStore;
 
     @Resource
-    private QueryRewriter queryRewriter;
-
-    @Resource
     private ToolCallback[] allTools;
 
     /**
@@ -65,16 +75,41 @@ public class TourismApp {
     }
 
     /**
+     * 从用户消息中检测城市名称
+     *
+     * @param message 用户消息
+     * @return 城市名称，多个则随机选一个，未检测到返回 null
+     */
+    private String detectCity(String message) {
+        List<String> matchedCities = new ArrayList<>();
+        for (String city : ZHEJIANG_CITIES) {
+            if (message.contains(city)) {
+                matchedCities.add(city);
+            }
+        }
+        if (matchedCities.isEmpty()) {
+            return null;
+        }
+        return matchedCities.get(RANDOM.nextInt(matchedCities.size()));
+    }
+
+    /**
      * 工具 + RAG 知识库（SSE 流式传输）- 前端主要使用
+     * <p>RAG 链路：原始消息 → RewriteQueryTransformer(仅用于检索) → 向量检索 → LLM 回答
      */
     public Flux<String> doChatWithToolsAndRagStream(String message, String chatId) {
-        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
+        String city = detectCity(message);
+        log.debug("检测到城市: {}", city);
+
         return chatClient
                 .prompt()
-                .user(rewrittenMessage)
+                .user(message)  // 原始消息发给 LLM
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(new MyLoggerAdvisor())
-                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(tourismSimpleVectorStore, null))
+                // RAG 链路：自动根据消息内容过滤城市 + queryTransformer(检索前改写) + allowEmptyContext
+                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(
+                        tourismSimpleVectorStore, city, dashscopeChatModel))
+                // 应用 tools
                 .toolCallbacks(allTools)
                 .stream()
                 .content();
