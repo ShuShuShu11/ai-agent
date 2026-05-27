@@ -56,7 +56,7 @@ public class TourismApp {
         log.info("会话记忆存储路径: {}", fileBasedChatMemory.getBaseDir());
 
         SummarizingChatMemory chatMemory = new SummarizingChatMemory(
-                fileBasedChatMemory, dashscopeChatModel, 20, 50);
+                fileBasedChatMemory, dashscopeChatModel, 2, 5);
 
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
