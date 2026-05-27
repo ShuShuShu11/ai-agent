@@ -92,9 +92,9 @@ public class SummarizingChatMemory implements ChatMemory {
 
         // 摘要后只保留近期消息
         List<Message> recentMessages = messages.subList(messages.size() - maxRecentMessages, messages.size());
-        delegate.saveSummary(conversationId, newSummary);
-        delegate.clear(conversationId);
-        delegate.add(conversationId, recentMessages);
+        delegate.clearConversation(conversationId);       // 只清除会话文件，保留摘要
+        delegate.saveSummary(conversationId, newSummary); // 保存新摘要
+        delegate.add(conversationId, recentMessages);      // 添加近期消息
 
         // 验证摘要保存
         String savedSummary = delegate.getSummary(conversationId);
