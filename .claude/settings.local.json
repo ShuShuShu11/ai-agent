@@ -39,7 +39,9 @@
       "Bash(./mvnw dependency:tree -q)",
       "Bash(./mvnw dependency:tree -Dincludes=org.springframework.ai)",
       "Bash(./mvnw dependency:build-classpath -DincludeScope=compile -q)",
-      "Bash(unzip -l ~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar)"
+      "Bash(unzip -l ~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar)",
+      "Bash(git rm *)",
+      "Bash(gh issue *)"
     ]
   }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * 基于文件持久化的对话记忆
- * <p>支持相对路径（自动转为项目根目录下的绝对路径）和摘要文件分离存储
+ * <p>支持相对路径（自动转为 user.home 下的绝对路径）和摘要文件分离存储
  */
 @Slf4j
 public class FileBasedChatMemory implements ChatMemory {
@@ -33,15 +33,14 @@ public class FileBasedChatMemory implements ChatMemory {
     }
 
     /**
-     * @param dir 文件存储目录（相对路径会转换为项目根目录下的绝对路径）
+     * @param dir 文件存储目录（相对路径会转换为 user.home 下的绝对路径）
      */
     public FileBasedChatMemory(String dir) {
         Path path = Path.of(dir);
         if (path.isAbsolute()) {
             this.baseDir = path;
         } else {
-            // 相对路径：从项目根目录（user.dir）解析
-            this.baseDir = Path.of(System.getProperty("user.dir"), dir);
+            this.baseDir = Path.of(System.getProperty("user.home"), dir);
         }
         File baseDirFile = this.baseDir.toFile();
         if (!baseDirFile.exists()) {
@@ -84,23 +83,13 @@ public class FileBasedChatMemory implements ChatMemory {
     }
 
     /**
-     * 只清除会话文件，保留摘要
-     */
-    public void clearConversation(String conversationId) {
-        deleteConversationFile(conversationId);
-    }
-
-    /**
      * 保存摘要（独立于原始消息文件）
      */
     public void saveSummary(String conversationId, String summary) {
         File summaryFile = getSummaryFile(conversationId);
-        log.debug("保存摘要到文件: {}，摘要长度={}", summaryFile.getAbsolutePath(), summary != null ? summary.length() : 0);
         try (Output output = new Output(new FileOutputStream(summaryFile))) {
             kryo.writeObject(output, summary);
-            log.debug("摘要文件保存成功，大小={} bytes", summaryFile.length());
         } catch (IOException e) {
-            log.error("保存摘要失败: {}", e.getMessage());
             e.printStackTrace();
         }
     }
