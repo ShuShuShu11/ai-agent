@@ -96,6 +96,11 @@ public class SummarizingChatMemory implements ChatMemory {
         delegate.clear(conversationId);
         delegate.add(conversationId, recentMessages);
 
+        // 验证摘要保存
+        String savedSummary = delegate.getSummary(conversationId);
+        log.debug("摘要保存验证: conversationId={}, 原始长度={}, 保存后读取长度={}",
+                conversationId, newSummary.length(), savedSummary != null ? savedSummary.length() : 0);
+
         log.info("对话 {} 摘要完成，输入 {} 条消息 → 摘要长度 {} 字符，保留 {} 条近期消息",
                 conversationId, messages.size(), newSummary.length(), maxRecentMessages);
     }

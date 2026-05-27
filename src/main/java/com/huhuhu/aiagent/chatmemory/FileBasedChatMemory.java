@@ -88,9 +88,12 @@ public class FileBasedChatMemory implements ChatMemory {
      */
     public void saveSummary(String conversationId, String summary) {
         File summaryFile = getSummaryFile(conversationId);
+        log.debug("保存摘要到文件: {}，摘要长度={}", summaryFile.getAbsolutePath(), summary != null ? summary.length() : 0);
         try (Output output = new Output(new FileOutputStream(summaryFile))) {
             kryo.writeObject(output, summary);
+            log.debug("摘要文件保存成功，大小={} bytes", summaryFile.length());
         } catch (IOException e) {
+            log.error("保存摘要失败: {}", e.getMessage());
             e.printStackTrace();
         }
     }
