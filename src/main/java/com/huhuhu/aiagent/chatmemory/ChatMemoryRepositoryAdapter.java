@@ -13,6 +13,7 @@ import java.util.List;
  * @deprecated 已废弃。现在 SummarizingChatMemory 直接实现 ChatMemory 接口，
  *             不再需要通过适配器转换。保留此类以备将来需要兼容旧代码时使用。
  */
+@Deprecated
 public class ChatMemoryRepositoryAdapter implements ChatMemoryRepository {
 
     private final ChatMemory chatMemory;

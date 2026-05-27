@@ -83,6 +83,13 @@ public class FileBasedChatMemory implements ChatMemory {
     }
 
     /**
+     * 只清除会话文件，保留摘要
+     */
+    public void clearConversation(String conversationId) {
+        deleteConversationFile(conversationId);
+    }
+
+    /**
      * 保存摘要（独立于原始消息文件）
      */
     public void saveSummary(String conversationId, String summary) {
