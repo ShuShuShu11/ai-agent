@@ -2,6 +2,7 @@
 application-local.yml
 tmp
 node_modules/
+*.kryo
 
 HELP.md
 target/
