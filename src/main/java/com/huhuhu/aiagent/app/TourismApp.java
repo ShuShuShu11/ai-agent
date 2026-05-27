@@ -52,8 +52,11 @@ public class TourismApp {
         //         .build();
 
         // 基于本地文件的会话记忆（支持自动摘要）
+        // 参数：存储目录、最大保留近期消息数、触发摘要的消息数阈值
+        // 触发阈值设为近期消息数的2.5倍，摘要后保留约70%的内容
         FileBasedChatMemory fileBasedChatMemory = new FileBasedChatMemory("./chat-memory");
-        SummarizingChatMemory chatMemory = new SummarizingChatMemory(fileBasedChatMemory, dashscopeChatModel, 20);
+        SummarizingChatMemory chatMemory = new SummarizingChatMemory(
+                fileBasedChatMemory, dashscopeChatModel, 20, 50);
         ChatMemoryRepositoryAdapter chatMemoryRepository = new ChatMemoryRepositoryAdapter(chatMemory);
 
         chatClient = ChatClient.builder(dashscopeChatModel)
