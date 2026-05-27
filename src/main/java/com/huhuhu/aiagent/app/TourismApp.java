@@ -1,7 +1,6 @@
 package com.huhuhu.aiagent.app;
 
 import com.huhuhu.aiagent.advisor.MyLoggerAdvisor;
-import com.huhuhu.aiagent.chatmemory.ChatMemoryRepositoryAdapter;
 import com.huhuhu.aiagent.chatmemory.FileBasedChatMemory;
 import com.huhuhu.aiagent.chatmemory.SummarizingChatMemory;
 import com.huhuhu.aiagent.rag.TourismRagCustomAdvisorFactory;
