@@ -9,6 +9,9 @@ import java.util.List;
 /**
  * ChatMemory 到 ChatMemoryRepository 的适配器
  * <p>将 ChatMemory 适配为 ChatMemoryRepository，使 MessageWindowChatMemory 可以使用
+ *
+ * @deprecated 已废弃。现在 SummarizingChatMemory 直接实现 ChatMemory 接口，
+ *             不再需要通过适配器转换。保留此类以备将来需要兼容旧代码时使用。
  */
 public class ChatMemoryRepositoryAdapter implements ChatMemoryRepository {
 
