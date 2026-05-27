@@ -11,14 +11,10 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
 
 @Component
 @Slf4j
@@ -49,18 +45,18 @@ public class TourismApp {
                 .build();
     }
 
-    public String doChat(String message, String chatId) {
-        ChatResponse chatResponse = chatClient
-                .prompt()
-                .user(message)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .call()
-                .chatResponse();
-        String content = chatResponse.getResult().getOutput().getText();
-        log.info("content: {}", content);
-        return content;
-    }
+    @Resource
+    private VectorStore tourismSimpleVectorStore;
 
+    @Resource
+    private QueryRewriter queryRewriter;
+
+    @Resource
+    private ToolCallback[] allTools;
+
+    /**
+     * 基础对话（SSE 流）
+     */
     public Flux<String> doChatByStream(String message, String chatId) {
         return chatClient
                 .prompt()
@@ -70,85 +66,8 @@ public class TourismApp {
                 .content();
     }
 
-    record TourismReport(String title, List<String> suggestions) {
-
-    }
-
-    public TourismReport doChatWithReport(String message, String chatId) {
-        TourismReport tourismReport = chatClient
-                .prompt()
-                .system(SYSTEM_PROMPT + "每次对话后都要生成旅游攻略报告，标题为{目的地}旅游攻略，内容为建议列表")
-                .user(message)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .call()
-                .entity(TourismReport.class);
-        log.info("tourismReport: {}", tourismReport);
-        return tourismReport;
-    }
-
-    // AI 旅游知识库问答功能
-
-    @Resource
-    private VectorStore tourismSimpleVectorStore;
-
-    @Resource
-    private QueryRewriter queryRewriter;
-
     /**
-     * 和 RAG 知识库进行对话
-     */
-    public String doChatWithRag(String message, String chatId) {
-        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
-        ChatResponse chatResponse = chatClient
-                .prompt()
-                .user(rewrittenMessage)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(new MyLoggerAdvisor())
-                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(tourismSimpleVectorStore, null))
-                .call()
-                .chatResponse();
-        String content = chatResponse.getResult().getOutput().getText();
-        log.info("content: {}", content);
-        return content;
-    }
-
-    // AI 调用工具能力
-    @Resource
-    private ToolCallback[] allTools;
-
-    /**
-     * AI 旅游助手（支持调用工具）
-     */
-    public String doChatWithTools(String message, String chatId) {
-        ChatResponse chatResponse = chatClient
-                .prompt()
-                .user(message)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(new MyLoggerAdvisor())
-                .toolCallbacks(allTools)
-                .call()
-                .chatResponse();
-        String content = chatResponse.getResult().getOutput().getText();
-        log.info("content: {}", content);
-        return content;
-    }
-
-    /**
-     * AI 旅游助手（支持调用工具，SSE 流式传输）
-     */
-    public Flux<String> doChatWithToolsStream(String message, String chatId) {
-        return chatClient
-                .prompt()
-                .user(message)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(new MyLoggerAdvisor())
-                .toolCallbacks(allTools)
-                .stream()
-                .content();
-    }
-
-    /**
-     * AI 旅游助手（支持调用工具 + RAG 知识库，SSE 流式传输）
+     * 工具 + RAG 知识库（SSE 流式传输）- 前端主要使用
      */
     public Flux<String> doChatWithToolsAndRagStream(String message, String chatId) {
         String rewrittenMessage = queryRewriter.doQueryRewrite(message);
@@ -161,27 +80,5 @@ public class TourismApp {
                 .toolCallbacks(allTools)
                 .stream()
                 .content();
-    }
-
-    // AI 调用 MCP 服务
-
-    @Resource
-    private ToolCallbackProvider toolCallbackProvider;
-
-    /**
-     * AI 旅游助手（调用 MCP 服务）
-     */
-    public String doChatWithMcp(String message, String chatId) {
-        ChatResponse chatResponse = chatClient
-                .prompt()
-                .user(message)
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(new MyLoggerAdvisor())
-                .toolCallbacks(toolCallbackProvider)
-                .call()
-                .chatResponse();
-        String content = chatResponse.getResult().getOutput().getText();
-        log.info("content: {}", content);
-        return content;
     }
 }

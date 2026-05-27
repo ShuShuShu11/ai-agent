@@ -453,6 +453,117 @@ SYSTEM_PROMPT 中没有明确要求遇到天气/实时资讯时**必须调用工
 
 ---
 
+## 问题 12：前端未使用的接口和方法需要清理
+
+**日期：** 2026-05-27
+
+### 问题描述
+
+`TourismApp.java` 中包含多个前端未调用的方法，导致代码冗余。
+
+### 解决方法
+
+1. **确认前端实际使用的接口：**
+   - `chatWithTourism` → `/ai/tourism/chat/sse`
+   - `chatWithTourismToolsAndRag` → `/ai/tourism/chat/with_tools_and_rag/sse`
+   - `chatWithManus` → `/ai/manus/chat`
+
+2. **删除前端未用的方法和接口：**
+   - `doChat`（基础同步对话）
+   - `doChatWithRag`（单独 RAG）
+   - `doChatWithTools`（单独工具）
+   - `doChatWithToolsStream`（工具 SSE）
+   - `doChatWithMcp`（MCP 调用）
+   - `doChatWithReport`（结构化报告）
+
+3. **保留的方法：**
+   - `doChatByStream` - 基础对话 SSE
+   - `doChatWithToolsAndRagStream` - 工具+RAG SSE
+
+### 验证结果
+
+- ✅ 编译通过
+- ✅ `TourismApp.java`: 187行 → 69行
+- ✅ `AiController.java`: 97行 → 48行
+
+---
+
+## 问题 13：PgVectorStoreConfig 在无数据库时启动失败
+
+**日期：** 2026-05-27
+
+### 问题描述
+
+未启用 PgVector 数据库时，应用启动失败：
+```
+UnsatisfiedDependencyException: Error creating bean with name 'tourismPgVectorStore'
+Parameter 0 of method tourismPgVectorStore in TourismPgVectorStoreConfig required a bean of type 'JdbcTemplate'
+```
+
+### 解决方法
+
+在 `TourismPgVectorStoreConfig` 添加条件注解：
+```java
+@Configuration
+@ConditionalOnProperty(name = "spring.datasource.url")
+public class TourismPgVectorStoreConfig {
+```
+
+只有配置了 `spring.datasource.url` 时才会加载 PgVectorStore 配置。
+
+---
+
+## 问题 14：RAG 强制路由 + ContextualQueryAugmenter 注入导致回答异常
+
+**日期：** 2026-05-27
+
+### 问题描述
+
+1. **表现 A**：启用 RAG 后，即使文档中有相关内容（如"西湖门票多少钱"），AI 仍然回复"超出我的服务范围"
+2. **表现 B**：`/sse` 可以正常闲聊，`/with_tools_and_rag/sse` 无法闲聊（如"你好我是噜噜"也会被拒绝）
+
+### 原因分析（同一根因）
+
+1. `ContextualQueryAugmenter` 是 Spring AI RAG 框架的内部组件，当它认为检索结果"不够好"或 context 为空时，会自动注入 `The user query is outside your knowledge base.` 到提示词中
+2. 即使向量检索确实找到了文档（`ConcatenationDocumentJoiner` 有日志），`ContextualQueryAugmenter` 仍可能认为 context 不够好
+3. `/with_tools_and_rag/sse` 路径**强制所有问题都走 RAG**，非旅游相关问题检索不到内容，更容易触发注入
+4. AI 看到注入的错误提示后，认为应该拒绝回答，就产生了"超出服务范围"或"你是谁"被误解的问题
+
+### 尝试的解决方法
+
+| 方案 | 结果 |
+|------|------|
+| `similarityThreshold` 0.5→0.3，`topK` 3→5 | 未解决问题 |
+| 禁用 `queryClassifier(null)` | API 不存在，编译失败 |
+| 字符串替换清理错误提示 | LLM 是在看到提示后回答的，替换回答无效 |
+| 自定义 `CleanUserMessageAdvisor` | Spring AI 1.0.0 API 不兼容 |
+
+### 解决方案（已实施）
+
+在 `doChatWithToolsAndRagStream` 中增加 `shouldUseRag()` 路由判断：
+
+```java
+private boolean shouldUseRag(String message) {
+    // 个人/闲聊问题，不走 RAG
+    if (message.matches(".*(叫什么|我是谁|记住|刚才|之前|我多少岁|我多大|你是谁|你好|嗨|哈喽).*")) {
+        return false;
+    }
+    // 旅游相关关键字，走 RAG
+    String[] tourismKeywords = {"景点", "美食", "酒店", "民宿", "门票", "西湖", "乌镇", "千岛湖", "杭州", "浙江", "旅游", "行程", "路线", "好玩", "推荐", "住宿", "交通", "天气"};
+    for (String kw : tourismKeywords) {
+        if (message.contains(kw)) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+- **走 RAG**：旅游相关问题（景点、美食、天气等）
+- **不走 RAG**：闲聊、个人信息、记忆相关问题
+
+---
+
 ## 模板
 
 ```markdown
