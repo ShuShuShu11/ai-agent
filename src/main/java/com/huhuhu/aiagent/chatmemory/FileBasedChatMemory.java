@@ -18,8 +18,9 @@ import java.util.List;
 
 /**
  * 基于文件持久化的对话记忆
- * <p>支持相对路径（自动转为 user.home 下的绝对路径）和摘要文件分离存储
+ * <p>支持相对路径（自动转为项目根目录下的绝对路径）和摘要文件分离存储
  */
+@Slf4j
 public class FileBasedChatMemory implements ChatMemory {
 
     private final Path baseDir;
