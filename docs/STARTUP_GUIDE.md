@@ -41,7 +41,7 @@ cd C:\Users\evil\Desktop\project\ai-agent
 
 **启动参数（可选）：**
 ```bash
-# 跳过数据库自动配置（开发调试用）
+# 跳过数据库自动配置（开发调试用，不影响 RAG 功能）
 ./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
 ```
 
@@ -99,5 +99,6 @@ cd C:\Users\evil\Desktop\project\ai-agent
 ## 五、已知限制
 
 - **数据库**：默认禁用 DataSource，启动时会有警告但不影响运行
-- **PgVector**：需自行启动 PgVector 服务并配置连接信息后才能使用知识库功能
+- **PgVector**：需自行启动 PgVector 服务并配置连接信息后才能使用
 - **MCP**：需启动独立的 MCP 服务，本项目使用 `image-search-mcp-server` 作为示例
+- **RAG 文档**：当前只加载杭州，其他城市需修改 `TourismDocumentLoader.CITIES` 数组
