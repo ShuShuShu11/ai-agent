@@ -20,7 +20,26 @@
       "Bash(./mvnw compile *)",
       "Bash(ls -la target/classes/com/huhuhu/aiagent/tools/WebScrapingTool.class)",
       "Bash(stat -c \"%y\" target/classes/com/huhuhu/aiagent/tools/WebScrapingTool.class)",
-      "Bash(./mvnw clean *)"
+      "Bash(./mvnw clean *)",
+      "Bash(unzip -l ~/.m2/repository/org/springframework/ai/spring-ai-rag/1.0.0/spring-ai-rag-1.0.0.jar)",
+      "Bash(javap -p ~/.m2/repository/org/springframework/ai/spring-ai-rag/1.0.0/spring-ai-rag-1.0.0.jar -c 'org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor$Builder')",
+      "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-rag/1.0.0/spring-ai-rag-1.0.0.jar 'org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor$Builder')",
+      "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0/spring-ai-core-1.0.0.jar org.springframework.ai.rag.retrieval.search.DocumentRetriever)",
+      "Bash(xargs -I{} unzip -l {})",
+      "Bash(javap *)",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep -l \"Document.class\" && echo \"{}\"')",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep -l \"MessageWindowChatMemory\" && echo \"{}\"')",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep \"MessageWindowChatMemory.class\" && echo \"{}\"')",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep \"ChatMemoryRepository.class\" && echo \"{}\"')",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep -i \"ChatMemoryRepositoryAdapter\\\\|AdapterChatMemoryRepository\\\\|ChatMemoryAdapter\" && echo \"{}\"')",
+      "Bash(xargs -I{} sh -c 'unzip -l \"{}\" 2>/dev/null | grep -i \"FileBasedChatMemory\" && echo \"{}\"')",
+      "Bash(./mvnw spring-boot:run -Dspring-boot.run.arguments=\"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration\")",
+      "Bash(pkill -f \"spring-boot:run\")",
+      "Bash(pkill -f \"ai-agent\")",
+      "Bash(./mvnw dependency:tree -q)",
+      "Bash(./mvnw dependency:tree -Dincludes=org.springframework.ai)",
+      "Bash(./mvnw dependency:build-classpath -DincludeScope=compile -q)",
+      "Bash(unzip -l ~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar)"
     ]
   }
 }

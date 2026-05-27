@@ -24,11 +24,17 @@ public class SummarizingChatMemory implements ChatMemory {
     private final FileBasedChatMemory delegate;
     private final ChatClient chatClient;
     private final int maxRecentMessages;
+    private final int summarizeThreshold;
 
     public SummarizingChatMemory(FileBasedChatMemory delegate, ChatModel chatModel, int maxRecentMessages) {
+        this(delegate, chatModel, maxRecentMessages, maxRecentMessages * 2);
+    }
+
+    public SummarizingChatMemory(FileBasedChatMemory delegate, ChatModel chatModel, int maxRecentMessages, int summarizeThreshold) {
         this.delegate = delegate;
         this.chatClient = ChatClient.builder(chatModel).build();
         this.maxRecentMessages = maxRecentMessages;
+        this.summarizeThreshold = summarizeThreshold;
     }
 
     @Override
@@ -56,25 +62,35 @@ public class SummarizingChatMemory implements ChatMemory {
     }
 
     /**
-     * 检查是否需要摘要，并执行摘要
+     * 检查是否需要摘要，只有超过 summarizeThreshold（默认 maxRecentMessages * 2）时才触发
+     * 摘要后保留 maxRecentMessages 条近期消息，下次添加后不会频繁触发摘要
      */
     private void checkAndSummarize(String conversationId) {
         List<Message> messages = delegate.get(conversationId);
-        if (messages.size() <= maxRecentMessages) {
+        // 只有超过阈值才摘要，避免每次都触发
+        if (messages.size() <= summarizeThreshold) {
             return;
         }
 
-        List<Message> oldMessages = messages.subList(0, messages.size() - maxRecentMessages);
+        String existingSummary = delegate.getSummary(conversationId);
+        String newSummary;
+        if (existingSummary != null && !existingSummary.isEmpty()) {
+            // 已有摘要，将旧消息 + 旧摘要 合并再压缩
+            List<Message> combinedMessages = new ArrayList<>();
+            combinedMessages.add(new SummarizedMemoryMessage(existingSummary));
+            combinedMessages.addAll(messages);
+            newSummary = summarizeMessages(combinedMessages);
+        } else {
+            newSummary = summarizeMessages(messages);
+        }
+
+        // 摘要后只保留近期消息
         List<Message> recentMessages = messages.subList(messages.size() - maxRecentMessages, messages.size());
-
-        String summary = summarizeMessages(oldMessages);
-        delegate.saveSummary(conversationId, summary);
-
+        delegate.saveSummary(conversationId, newSummary);
         delegate.clear(conversationId);
         delegate.add(conversationId, recentMessages);
 
-        log.info("对话 {} 已摘要，早期 {} 条消息压缩为摘要，保留 {} 条近期消息",
-                conversationId, oldMessages.size(), maxRecentMessages);
+        log.info("对话 {} 已摘要，保留 {} 条近期消息 + 摘要", conversationId, maxRecentMessages);
     }
 
     /**
