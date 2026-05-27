@@ -11,30 +11,46 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 基于文件持久化的对话记忆
+ * <p>支持相对路径（自动转为 user.home 下的绝对路径）和摘要文件分离存储
  */
 public class FileBasedChatMemory implements ChatMemory {
 
-    private final String BASE_DIR;
+    private final Path baseDir;
+    private static final String SUMMARY_SUFFIX = ".summary";
     private static final Kryo kryo = new Kryo();
 
     static {
         kryo.setRegistrationRequired(false);
-        // 设置实例化策略
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
     }
 
-    // 构造对象时，指定文件保存目录
+    /**
+     * @param dir 文件存储目录（相对路径会转换为 user.home 下的绝对路径）
+     */
     public FileBasedChatMemory(String dir) {
-        this.BASE_DIR = dir;
-        File baseDir = new File(dir);
-        if (!baseDir.exists()) {
-            baseDir.mkdirs();
+        Path path = Path.of(dir);
+        if (path.isAbsolute()) {
+            this.baseDir = path;
+        } else {
+            this.baseDir = Path.of(System.getProperty("user.home"), dir);
         }
+        File baseDirFile = this.baseDir.toFile();
+        if (!baseDirFile.exists()) {
+            baseDirFile.mkdirs();
+        }
+    }
+
+    /**
+     * 获取存储根目录的绝对路径
+     */
+    public String getBaseDir() {
+        return baseDir.toAbsolutePath().toString();
     }
 
     @Override
@@ -51,10 +67,43 @@ public class FileBasedChatMemory implements ChatMemory {
 
     @Override
     public void clear(String conversationId) {
-        File file = getConversationFile(conversationId);
-        if (file.exists()) {
-            file.delete();
+        deleteConversationFile(conversationId);
+        deleteSummaryFile(conversationId);
+    }
+
+    /**
+     * 保存摘要（独立于原始消息文件）
+     */
+    public void saveSummary(String conversationId, String summary) {
+        File summaryFile = getSummaryFile(conversationId);
+        try (Output output = new Output(new FileOutputStream(summaryFile))) {
+            kryo.writeObject(output, summary);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取摘要
+     */
+    public String getSummary(String conversationId) {
+        File summaryFile = getSummaryFile(conversationId);
+        if (!summaryFile.exists()) {
+            return null;
+        }
+        try (Input input = new Input(new FileInputStream(summaryFile))) {
+            return kryo.readObject(input, String.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 清除摘要
+     */
+    public void clearSummary(String conversationId) {
+        deleteSummaryFile(conversationId);
     }
 
     private List<Message> getOrCreateConversation(String conversationId) {
@@ -80,6 +129,24 @@ public class FileBasedChatMemory implements ChatMemory {
     }
 
     private File getConversationFile(String conversationId) {
-        return new File(BASE_DIR, conversationId + ".kryo");
+        return baseDir.resolve(conversationId + ".kryo").toFile();
+    }
+
+    private File getSummaryFile(String conversationId) {
+        return baseDir.resolve(conversationId + SUMMARY_SUFFIX + ".kryo").toFile();
+    }
+
+    private void deleteConversationFile(String conversationId) {
+        File file = getConversationFile(conversationId);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private void deleteSummaryFile(String conversationId) {
+        File file = getSummaryFile(conversationId);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 }

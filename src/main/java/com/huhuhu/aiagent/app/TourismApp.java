@@ -3,13 +3,13 @@ package com.huhuhu.aiagent.app;
 import com.huhuhu.aiagent.advisor.MyLoggerAdvisor;
 import com.huhuhu.aiagent.chatmemory.ChatMemoryRepositoryAdapter;
 import com.huhuhu.aiagent.chatmemory.FileBasedChatMemory;
+import com.huhuhu.aiagent.chatmemory.SummarizingChatMemory;
 import com.huhuhu.aiagent.rag.TourismRagCustomAdvisorFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -51,13 +51,10 @@ public class TourismApp {
         //         .maxMessages(20)
         //         .build();
 
-        //2、基于本地文件的会话记忆
+        // 基于本地文件的会话记忆（支持自动摘要）
         FileBasedChatMemory fileBasedChatMemory = new FileBasedChatMemory("./chat-memory");
-        ChatMemoryRepositoryAdapter chatMemoryRepository = new ChatMemoryRepositoryAdapter(fileBasedChatMemory);
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryRepository(chatMemoryRepository)
-                .maxMessages(20)
-                .build();
+        SummarizingChatMemory chatMemory = new SummarizingChatMemory(fileBasedChatMemory, dashscopeChatModel, 20);
+        ChatMemoryRepositoryAdapter chatMemoryRepository = new ChatMemoryRepositoryAdapter(chatMemory);
 
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
