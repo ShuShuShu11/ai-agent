@@ -17,16 +17,16 @@ public class TourismRagCustomAdvisorFactory {
      * 创建自定义的 RAG 检索增强顾问
      *
      * @param vectorStore 向量存储
-     * @param status      状态过滤（传 null 或空字符串则不过滤）
+     * @param city       城市过滤（传 null 或空字符串则不过滤）
      * @return 自定义的 RAG 检索增强顾问
      */
-    public static Advisor createTourismRagCustomAdvisor(VectorStore vectorStore, String status) {
+    public static Advisor createTourismRagCustomAdvisor(VectorStore vectorStore, String city) {
         DocumentRetriever documentRetriever;
 
-        if (status != null && !status.isEmpty()) {
-            // 过滤特定状态的文档
+        if (city != null && !city.isEmpty()) {
+            // 过滤特定城市的文档
             Filter.Expression expression = new FilterExpressionBuilder()
-                    .eq("status", status)
+                    .eq("city", city)
                     .build();
             documentRetriever = VectorStoreDocumentRetriever.builder()
                     .vectorStore(vectorStore)

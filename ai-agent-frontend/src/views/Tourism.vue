@@ -112,7 +112,7 @@ const goBack = () => {
 
 onMounted(() => {
   chatId.value = generateChatId()
-  addMessage('您好！我是浙江文旅专家，很高兴为您服务。请告诉我您想了解浙江的哪些旅游信息，我可以为您介绍景点、美食、住宿、交通和行程规划。', false)
+  addMessage('嗨！我是浙江旅游助手 呼呼～有什么关于浙江旅游的问题尽管问我吧！', false)
 })
 
 onBeforeUnmount(() => {
