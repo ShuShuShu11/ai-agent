@@ -51,6 +51,8 @@ public class SummarizingChatMemory implements ChatMemory {
         List<Message> result = new ArrayList<>();
         if (summary != null && !summary.isEmpty()) {
             result.add(new SummarizedMemoryMessage(summary));
+            log.debug("对话 {} 返回摘要，长度 {} 字符 + {} 条近期消息",
+                    conversationId, summary.length(), recentMessages.size());
         }
         result.addAll(recentMessages);
         return result;
@@ -90,13 +92,16 @@ public class SummarizingChatMemory implements ChatMemory {
         delegate.clear(conversationId);
         delegate.add(conversationId, recentMessages);
 
-        log.info("对话 {} 已摘要，保留 {} 条近期消息 + 摘要", conversationId, maxRecentMessages);
+        log.info("对话 {} 摘要完成，输入 {} 条消息 → 摘要长度 {} 字符，保留 {} 条近期消息",
+                conversationId, messages.size(), newSummary.length(), maxRecentMessages);
     }
 
     /**
      * 调用 LLM 将旧消息压缩为摘要
      */
     private String summarizeMessages(List<Message> messages) {
+        log.debug("开始摘要，共 {} 条消息", messages.size());
+
         StringBuilder sb = new StringBuilder();
         sb.append("以下是对话历史的摘要：\n");
 
@@ -106,10 +111,13 @@ public class SummarizingChatMemory implements ChatMemory {
 
         String prompt = "请将以下对话内容压缩成一段简短的摘要，保留关键信息（用户意图、重要事实、已完成的任务）：\n\n" + sb.toString();
 
-        return chatClient.prompt()
+        String summary = chatClient.prompt()
                 .user(prompt)
                 .call()
                 .content();
+
+        log.debug("摘要生成完成，长度 {} 字符", summary != null ? summary.length() : 0);
+        return summary;
     }
 
     /**
