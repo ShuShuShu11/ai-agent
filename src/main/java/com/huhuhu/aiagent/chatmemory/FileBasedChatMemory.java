@@ -4,6 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.objenesis.strategy.StdInstantiatorStrategy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 
@@ -53,11 +54,20 @@ public class FileBasedChatMemory implements ChatMemory {
         return baseDir.toAbsolutePath().toString();
     }
 
+    /**
+     * 获取会话文件路径（调试用）
+     */
+    public File getConversationFilePath(String conversationId) {
+        return getConversationFile(conversationId);
+    }
+
     @Override
     public void add(String conversationId, List<Message> messages) {
+        log.debug("FileBasedChatMemory.add() 被调用，conversationId={}，消息数={}", conversationId, messages.size());
         List<Message> conversationMessages = getOrCreateConversation(conversationId);
         conversationMessages.addAll(messages);
         saveConversation(conversationId, conversationMessages);
+        log.debug("FileBasedChatMemory.add() 完成，当前会话共有 {} 条消息", conversationMessages.size());
     }
 
     @Override
@@ -121,9 +131,12 @@ public class FileBasedChatMemory implements ChatMemory {
 
     private void saveConversation(String conversationId, List<Message> messages) {
         File file = getConversationFile(conversationId);
+        log.debug("保存会话到文件: {}，消息数={}", file.getAbsolutePath(), messages.size());
         try (Output output = new Output(new FileOutputStream(file))) {
             kryo.writeObject(output, messages);
+            log.debug("文件保存成功，大小={} bytes", file.length());
         } catch (IOException e) {
+            log.error("保存会话失败: {}", e.getMessage());
             e.printStackTrace();
         }
     }

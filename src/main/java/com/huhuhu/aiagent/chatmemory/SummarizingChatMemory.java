@@ -39,6 +39,7 @@ public class SummarizingChatMemory implements ChatMemory {
 
     @Override
     public void add(String conversationId, List<Message> messages) {
+        log.debug("SummarizingChatMemory.add() 被调用，conversationId={}，消息数={}", conversationId, messages.size());
         delegate.add(conversationId, messages);
         checkAndSummarize(conversationId);
     }
@@ -69,8 +70,11 @@ public class SummarizingChatMemory implements ChatMemory {
      */
     private void checkAndSummarize(String conversationId) {
         List<Message> messages = delegate.get(conversationId);
+        log.debug("checkAndSummarize() 当前消息数={}，阈值={}", messages.size(), summarizeThreshold);
+
         // 只有超过阈值才摘要，避免每次都触发
         if (messages.size() <= summarizeThreshold) {
+            log.debug("消息数未超过阈值，不触发摘要");
             return;
         }
 
