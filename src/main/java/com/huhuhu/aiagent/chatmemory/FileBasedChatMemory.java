@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * 基于文件持久化的对话记忆
- * <p>支持相对路径（自动转为 user.home 下的绝对路径）和摘要文件分离存储
+ * <p>支持相对路径（自动转为项目根目录下的绝对路径）和摘要文件分离存储
  */
 @Slf4j
 public class FileBasedChatMemory implements ChatMemory {
@@ -33,14 +33,15 @@ public class FileBasedChatMemory implements ChatMemory {
     }
 
     /**
-     * @param dir 文件存储目录（相对路径会转换为 user.home 下的绝对路径）
+     * @param dir 文件存储目录（相对路径会转换为项目根目录下的绝对路径）
      */
     public FileBasedChatMemory(String dir) {
         Path path = Path.of(dir);
         if (path.isAbsolute()) {
             this.baseDir = path;
         } else {
-            this.baseDir = Path.of(System.getProperty("user.home"), dir);
+            // 相对路径：从项目根目录（user.dir）解析
+            this.baseDir = Path.of(System.getProperty("user.dir"), dir);
         }
         File baseDirFile = this.baseDir.toFile();
         if (!baseDirFile.exists()) {
