@@ -38,5 +38,5 @@ build/
 ### VS Code ###
 .vscode/
 
-### Docs (not committed) ###
-docs/
+### Docs ###
+# docs/  # 已移除，允许上传
