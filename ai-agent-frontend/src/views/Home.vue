@@ -1,58 +1,60 @@
 <template>
   <div class="home-container">
     <div class="header">
-      <h1 class="title">AI超级智能体</h1>
-      <p class="subtitle">探索AI的无限可能</p>
+      <h1 class="title">呼呼 AI 智能体</h1>
+      <p class="subtitle">探索 AI 的无限可能</p>
     </div>
 
     <div class="apps-container">
-      <div class="app-card" @click="navigateTo('/tourism')">
-        <div class="app-icon tourism-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
-        </div>
-        <div class="app-info">
-          <div class="app-title">浙江旅游助手</div>
-          <div class="app-desc">浙江文旅专家，景点美食行程规划全搞定</div>
-        </div>
-        <div class="app-tags">
-          <span class="tag">景点推荐</span>
-          <span class="tag">美食攻略</span>
-          <span class="tag">行程规划</span>
-        </div>
-        <div class="app-button">
-          <span>立即体验</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+      <!-- 浙江旅游助手 -->
+      <div class="app-section">
+        <div class="section-title">浙江旅游助手</div>
+        <div class="app-card" @click="navigateTo('/tourism')">
+          <div class="app-icon tourism-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="app-info">
+            <div class="app-title">呼呼</div>
+            <div class="app-desc">浙江文旅专家，景点美食行程规划全搞定</div>
+          </div>
+          <div class="app-tags">
+            <span class="tag">景点推荐</span>
+            <span class="tag">美食攻略</span>
+            <span class="tag">行程规划</span>
+          </div>
+          <div class="mode-preview">
+            <span class="mode-tag">基础</span>
+            <span class="mode-tag">+工具</span>
+            <span class="mode-tag">+RAG</span>
+            <span class="mode-tag">+MCP</span>
+          </div>
         </div>
       </div>
 
-      <div class="app-card" @click="navigateTo('/super-agent')">
-        <div class="app-icon robot-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="10" rx="2"/>
-            <circle cx="12" cy="5" r="3"/>
-            <path d="M12 8v3M8 16l-1 2M16 16l1 2M8 14h8"/>
-          </svg>
-        </div>
-        <div class="app-info">
-          <div class="app-title">AI超级智能体</div>
-          <div class="app-desc">全能型AI助手，解决各类专业问题</div>
-        </div>
-        <div class="app-tags">
-          <span class="tag">智能问答</span>
-          <span class="tag">内容创作</span>
-          <span class="tag">问题解答</span>
-        </div>
-        <div class="app-button">
-          <span>立即体验</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+      <!-- AI 超级智能体 -->
+      <div class="app-section">
+        <div class="section-title">AI 超级智能体</div>
+        <div class="app-card" @click="navigateTo('/super-agent')">
+          <div class="app-icon robot-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="10" rx="2"/>
+              <circle cx="12" cy="5" r="3"/>
+              <path d="M12 8v3M8 16l-1 2M16 16l1 2M8 14h8"/>
+            </svg>
+          </div>
+          <div class="app-info">
+            <div class="app-title">Manus</div>
+            <div class="app-desc">全能型 AI 助手，自主规划并调用工具解决复杂任务</div>
+          </div>
+          <div class="app-tags">
+            <span class="tag">智能问答</span>
+            <span class="tag">内容创作</span>
+            <span class="tag">问题解答</span>
+          </div>
         </div>
       </div>
     </div>
@@ -105,17 +107,31 @@ const navigateTo = (path) => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 32px;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
   flex: 1;
+}
+
+.app-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 14px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
 }
 
 .app-card {
   width: 320px;
   background: #fff;
   border-radius: 20px;
-  padding: 32px;
+  padding: 28px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -132,18 +148,18 @@ const navigateTo = (path) => {
 }
 
 .app-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .app-icon svg {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   color: #fff;
 }
 
@@ -157,60 +173,51 @@ const navigateTo = (path) => {
 
 .app-info {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .app-title {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #1a1a2e;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .app-desc {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #888;
   margin: 0;
   line-height: 1.5;
 }
 
-.app-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 0.9rem;
-  transition: color 0.2s;
-}
-
-.app-button svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s;
-}
-
-.app-card:hover .app-button {
-  color: #333;
-}
-
-.app-card:hover .app-button svg {
-  transform: translateX(3px);
-}
-
 .app-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 6px;
+  margin-bottom: 12px;
   justify-content: center;
 }
 
 .tag {
-  padding: 4px 12px;
+  padding: 3px 10px;
   background: #f1f5f9;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
+}
+
+.mode-preview {
+  display: flex;
+  gap: 6px;
+}
+
+.mode-tag {
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #f0fdf4, #d1fae5);
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  font-size: 11px;
+  color: #10b981;
 }
 
 @media (max-width: 768px) {
@@ -220,7 +227,7 @@ const navigateTo = (path) => {
 
   .app-card {
     width: 100%;
-    max-width: 380px;
+    max-width: 340px;
   }
 }
 </style>

@@ -12,18 +12,18 @@
     </div>
 
     <div class="mode-selector">
-      <button
-        :class="['mode-btn', { active: currentMode === 'basic' }]"
-        @click="currentMode = 'basic'"
-      >
-        基础模式
-      </button>
-      <button
-        :class="['mode-btn', { active: currentMode === 'tools+rag' }]"
-        @click="currentMode = 'tools+rag'"
-      >
-        工具+RAG
-      </button>
+      <div class="mode-tabs">
+        <button
+          v-for="mode in modes"
+          :key="mode.value"
+          :class="['mode-tab', { active: currentMode === mode.value }]"
+          @click="currentMode = mode.value"
+        >
+          <span class="mode-icon" v-html="mode.icon"></span>
+          <span class="mode-label">{{ mode.label }}</span>
+          <span class="mode-desc">{{ mode.desc }}</span>
+        </button>
+      </div>
     </div>
 
     <div class="chat-area">
@@ -46,14 +46,48 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import ChatRoom from '../components/ChatRoom.vue'
 import AppFooter from '../components/AppFooter.vue'
-import { chatWithTourism, chatWithTourismToolsAndRag } from '../api'
+import { chatWithTourism, chatWithTourismToolsAndRag, chatWithMcp, chatWithAll } from '../api'
 
 const router = useRouter()
 const messages = ref([])
 const chatId = ref('')
 const connectionStatus = ref('disconnected')
-const currentMode = ref('tools+rag')
+const currentMode = ref('all')
 let eventSource = null
+
+const modes = [
+  {
+    value: 'basic',
+    label: '基础对话',
+    desc: '纯 AI 问答',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
+  },
+  {
+    value: 'tools+rag',
+    label: '知识增强',
+    desc: '工具+知识库',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'
+  },
+  {
+    value: 'mcp',
+    label: 'MCP 地图',
+    desc: '高德地图工具',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'
+  },
+  {
+    value: 'all',
+    label: '全能模式',
+    desc: '工具+RAG+MCP',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+  }
+]
+
+const modeMap = {
+  basic: chatWithTourism,
+  'tools+rag': chatWithTourismToolsAndRag,
+  mcp: chatWithMcp,
+  all: chatWithAll
+}
 
 const generateChatId = () => {
   return Math.random().toString(36).substring(2, 10)
@@ -79,11 +113,7 @@ const sendMessage = (message) => {
 
   connectionStatus.value = 'connecting'
 
-  if (currentMode.value === 'tools+rag') {
-    eventSource = chatWithTourismToolsAndRag(message, chatId.value)
-  } else {
-    eventSource = chatWithTourism(message, chatId.value)
-  }
+  eventSource = modeMap[currentMode.value](message, chatId.value)
 
   eventSource.onmessage = (event) => {
     const data = event.data
@@ -126,15 +156,16 @@ onBeforeUnmount(() => {
 .tourism-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background: #f8fafc;
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: #fff;
   border-bottom: 1px solid #eee;
   position: sticky;
@@ -145,8 +176,8 @@ onBeforeUnmount(() => {
 .back-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 4px;
+  font-size: 13px;
   color: #666;
   cursor: pointer;
   transition: color 0.2s;
@@ -157,60 +188,101 @@ onBeforeUnmount(() => {
 }
 
 .back-button svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1a1a2e;
   margin: 0;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .chat-id {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .mode-selector {
-  display: flex;
-  gap: 8px;
-  padding: 12px 20px;
+  padding: 16px 20px;
   background: #fff;
   border-bottom: 1px solid #eee;
 }
 
-.mode-btn {
-  padding: 6px 16px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
+.mode-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.mode-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   background: #fff;
-  color: #666;
-  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.mode-btn:hover {
+.mode-tab:hover {
   border-color: #10b981;
-  color: #10b981;
+  background: #f0fdf4;
 }
 
-.mode-btn.active {
-  background: linear-gradient(135deg, #10b981, #34d399);
+.mode-tab.active {
   border-color: #10b981;
+  background: linear-gradient(135deg, #10b981, #34d399);
   color: #fff;
+}
+
+.mode-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-icon :deep(svg) {
+  width: 20px;
+  height: 20px;
+}
+
+.mode-tab.active .mode-icon :deep(svg) {
+  stroke: #fff;
+}
+
+.mode-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.mode-desc {
+  font-size: 11px;
+  color: #888;
+}
+
+.mode-tab.active .mode-label {
+  color: #fff;
+}
+
+.mode-tab.active .mode-desc {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .chat-area {
   flex: 1;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
 }
 
 .footer-container {
@@ -220,6 +292,10 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
   .header {
     padding: 12px 16px;
+  }
+
+  .mode-selector {
+    flex-wrap: wrap;
   }
 
   .chat-area {

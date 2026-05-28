@@ -59,8 +59,20 @@ export const chatWithManus = (message) => {
   return connectSSE('/ai/manus/chat', { message })
 }
 
+// MCP服务聊天（调用高德地图等MCP工具）
+export const chatWithMcp = (message, chatId) => {
+  return connectSSE('/ai/tourism/chat/with_mcp/sse', { message, chatId })
+}
+
+// 工具 + RAG + MCP
+export const chatWithAll = (message, chatId) => {
+  return connectSSE('/ai/tourism/chat/with_all/sse', { message, chatId })
+}
+
 export default {
   chatWithTourism,
   chatWithTourismToolsAndRag,
-  chatWithManus
+  chatWithManus,
+  chatWithMcp,
+  chatWithAll
 } 

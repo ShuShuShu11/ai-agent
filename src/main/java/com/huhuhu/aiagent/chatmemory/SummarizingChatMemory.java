@@ -3,11 +3,10 @@ package com.huhuhu.aiagent.chatmemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
-
-import org.springframework.ai.content.Content;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,17 +130,12 @@ public class SummarizingChatMemory implements ChatMemory {
 
     /**
      * 表示摘要的消息类型
+     * <p>继承 AssistantMessage，使其成为 Spring AI 标准消息类型，
+     * 避免 RAG Advisor 遍历消息时无法识别自定义类型
      */
-    public static class SummarizedMemoryMessage implements Message {
-        private final String content;
-
+    public static class SummarizedMemoryMessage extends AssistantMessage {
         public SummarizedMemoryMessage(String content) {
-            this.content = content;
-        }
-
-        @Override
-        public String getText() {
-            return content;
+            super(content);
         }
 
         @Override

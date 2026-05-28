@@ -11,6 +11,7 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -29,7 +30,7 @@ public class TourismApp {
     private static final String SYSTEM_PROMPT = "你叫呼呼，是浙江旅游助手，风格亲切随和，像朋友聊天一样。" +
             "开场简单打招呼，告诉用户你是浙江旅游助手呼呼，随时可以问你浙江旅游相关问题。" +
             "你可以聊的：景点介绍、美食推荐、住宿建议、交通指南、行程规划。" +
-            "遇到天气、实时资讯等需要联网的问题，直接调用 searchWeb 工具。" +
+            "遇到天气问题，先调用 maps_weather 工具，失败再用 searchWeb。其他实时资讯直接调用 searchWeb 工具。" +
             "遇到不熟悉的问题，直接说不知道，不要编造。" +
             "回答要简洁友好，不要太正式。";
 
@@ -70,8 +71,17 @@ public class TourismApp {
     @Resource
     private VectorStore tourismSimpleVectorStore;
 
+    /**
+     * 注入 工具调用bean
+     */
     @Resource
     private ToolCallback[] allTools;
+
+    /**
+     * 注入 mcp服务的bean
+     */
+    @Resource
+    private ToolCallbackProvider toolCallbackProvider;
 
     /**
      * 基础对话（SSE 流）
@@ -122,6 +132,41 @@ public class TourismApp {
                         tourismSimpleVectorStore, city, dashscopeChatModel))
                 // 应用 tools
                 .toolCallbacks(allTools)
+                .stream()
+                .content();
+    }
+
+    /**
+     * MCP 服务专属对话（SSE 流）- 调用 MCP 工具（如高德地图）
+     */
+    public Flux<String> doChatWithMcpTools(String message, String chatId) {
+        log.debug("MCP 工具对话: {}", message);
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(new MyLoggerAdvisor())
+                .toolCallbacks(toolCallbackProvider)
+                .stream()
+                .content();
+    }
+
+    /**
+     * 工具 + RAG + MCP 知识库（SSE 流）
+     */
+    public Flux<String> doChatWithToolsAndRagAndMcpStream(String message, String chatId) {
+        String city = detectCity(message);
+        log.debug("检测到城市: {}", city);
+
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(new MyLoggerAdvisor())
+                .advisors(TourismRagCustomAdvisorFactory.createTourismRagCustomAdvisor(
+                        tourismSimpleVectorStore, city, dashscopeChatModel))
+                .toolCallbacks(allTools)
+                .toolCallbacks(toolCallbackProvider)
                 .stream()
                 .content();
     }
