@@ -105,8 +105,7 @@ watch(() => props.messages.map(m => m.content).join(''), () => {
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
-  min-height: 500px;
+  height: 100%;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
